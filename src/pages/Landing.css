@@ -1,0 +1,277 @@
+.landing {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-bg);
+}
+
+/* ── Header ── */
+.land-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-card);
+}
+
+.land-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-weight: 700;
+  font-size: 1.15rem;
+  color: var(--color-text-dark);
+}
+
+/* ── Hero ── */
+.land-hero {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 3rem;
+  padding: 5rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.land-badge {
+  display: inline-block;
+  padding: 0.3rem 0.75rem;
+  background: var(--color-accent);
+  color: var(--color-primary);
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.land-title {
+  font-size: 3rem;
+  font-weight: 800;
+  line-height: 1.15;
+  color: var(--color-text-dark);
+  margin-bottom: 1.25rem;
+  font-family: var(--font-display);
+}
+
+.land-accent {
+  color: var(--color-primary);
+}
+
+.land-subtitle {
+  font-size: 1.1rem;
+  color: var(--color-text-dim);
+  line-height: 1.7;
+  margin-bottom: 2rem;
+  max-width: 480px;
+}
+
+.land-cta {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+/* ── Hero card ── */
+.land-hero-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.hero-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: var(--shadow);
+  width: 100%;
+  max-width: 380px;
+}
+
+.hero-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+}
+
+.hero-skill-tag {
+  padding: 0.25rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.hero-skill-tag.writing {
+  background: var(--color-skill-writing-bg);
+  color: var(--color-skill-writing);
+}
+
+.hero-score {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--color-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.hero-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.hero-criterion {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--color-text-dim);
+}
+
+.hero-bar-wrap {
+  width: 80px;
+  height: 6px;
+  background: var(--color-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.hero-bar {
+  height: 100%;
+  background: var(--color-primary);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.hero-score-sm {
+  font-weight: 700;
+  color: var(--color-text-dark);
+  font-variant-numeric: tabular-nums;
+  min-width: 2.5ch;
+  text-align: right;
+}
+
+/* ── Features ── */
+.land-features {
+  padding: 4rem 2rem;
+  background: var(--color-card-alt);
+}
+
+.land-section-title {
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 2.5rem;
+}
+
+.land-features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.feature-card {
+  background: var(--color-card);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 1.75rem;
+  transition: box-shadow 0.2s;
+}
+
+.feature-card:hover {
+  box-shadow: var(--shadow);
+}
+
+.feature-icon {
+  font-size: 2rem;
+  margin-bottom: 0.75rem;
+}
+
+.feature-tag {
+  display: inline-block;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  margin-bottom: 0.75rem;
+}
+
+.skill-tag--writing {
+  background: var(--color-skill-writing-bg);
+  color: var(--color-skill-writing);
+}
+
+.skill-tag--speaking {
+  background: var(--color-skill-speaking-bg);
+  color: var(--color-skill-speaking);
+}
+
+.skill-tag--chat {
+  background: var(--color-skill-chat-bg);
+  color: var(--color-skill-chat);
+}
+
+.feature-card h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: var(--color-text-dark);
+}
+
+.feature-card p {
+  font-size: 0.9rem;
+  color: var(--color-text-dim);
+  line-height: 1.65;
+}
+
+/* ── CTA section ── */
+.land-cta-section {
+  text-align: center;
+  padding: 4rem 2rem;
+}
+
+.land-cta-section h2 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 0.75rem;
+}
+
+.land-cta-section p {
+  color: var(--color-text-dim);
+  margin-bottom: 1.75rem;
+}
+
+/* ── Footer ── */
+.land-footer {
+  padding: 1.5rem;
+  text-align: center;
+  border-top: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  font-size: 0.85rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .land-hero {
+    grid-template-columns: 1fr;
+    padding: 3rem 1.5rem;
+    gap: 2rem;
+  }
+
+  .land-title { font-size: 2rem; }
+
+  .land-hero-visual { order: -1; }
+
+  .hero-card { max-width: 100%; }
+
+  .land-features { padding: 3rem 1rem; }
+}

@@ -2,10 +2,10 @@
 
 AI-powered IELTS Writing & Speaking practice app. Built with React + Vite, styled to match the CDI Practice design system, installable as a PWA on desktop and mobile.
 
-- **Writing Checker** — paste an essay, get band scores across all 4 IELTS criteria via Gemini
-- **Speaking Practice** — real Part 1/2/3 exam flow using the browser's speech synthesis (AI examiner voice) and speech recognition (your spoken answers), scored by Gemini
-- **AI Tutor Chat** — free-form IELTS help, streamed from Gemini
-- **Auth** — Google, GitHub, and email/password (with password reset) via Supabase
+- **AI Studio** — one unified chat: check your Writing (upload essay photos or paste text), practice Speaking (guided Part 1→2→3 with voice recording), or just ask IELTS questions
+- **Whole-number band scoring** — each criterion is a whole IELTS band (6, 7, 8…), overall band computed with the official rounding rule (average, rounded up to the nearest half band)
+- **Auth** — Google, GitHub, and email/password (with working password reset) via Supabase
+- Powered by **Groq** (Llama 4 Scout for vision/text, Whisper for speech-to-text) — free tier, no billing required
 
 ## 1. Setup
 
@@ -19,7 +19,7 @@ Fill in `.env`:
 | Variable | Where to get it |
 |---|---|
 | `VITE_SUPABASE_URL` / `VITE_SUPABASE_ANON_KEY` | Supabase dashboard → Project Settings → API |
-| `VITE_GEMINI_API_KEY` | [Google AI Studio](https://aistudio.google.com/apikey) |
+| `VITE_GROQ_API_KEY` | [console.groq.com](https://console.groq.com) → API Keys (free, no card) |
 
 ## 2. Supabase configuration
 
@@ -47,5 +47,6 @@ npm run build
 
 ## Notes
 
-- Speaking practice uses the Web Speech API (`SpeechRecognition` + `speechSynthesis`), which is best supported in Chrome and Edge.
+- Speaking practice records real microphone audio and transcribes it via Groq's Whisper before scoring — best supported in Chrome and Edge.
+- The Groq API key is called directly from the browser (same tradeoff most fast-shipped AI frontends make). Set a rate limit in the Groq console if you're worried about abuse before wider launch; moving calls behind a serverless function is the more robust fix later.
 - The app is a PWA — installable from the browser on both desktop and mobile (Add to Home Screen).

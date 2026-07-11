@@ -1,14 +1,17 @@
 import { useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { useLanguage } from '../context/LanguageContext'
 import { Logo } from '../components/Logo'
 import { ThemeToggle } from '../components/ThemeToggle'
+import { LanguageSwitcher } from '../components/LanguageSwitcher'
 import './Login.css'
 
 const MODES = { signin: 'signin', signup: 'signup', reset: 'reset' }
 
 export default function Login() {
   const { session, loading, signInWithGoogle, signInWithGitHub, signInWithEmail, signUpWithEmail, resetPassword } = useAuth()
+  const { t } = useLanguage()
   const [mode, setMode] = useState(MODES.signin)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -16,7 +19,7 @@ export default function Login() {
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
 
-  if (!loading && session) return <Navigate to="/dashboard" replace />
+  if (!loading && session) return <Navigate to="/chat" replace />
 
   const clear = () => { setError(''); setSuccess('') }
 
@@ -37,18 +40,19 @@ export default function Login() {
       const { error } = await resetPassword(email)
       setBusy(false)
       if (error) return setError(error.message)
-      return setSuccess('Check your email for a password reset link.')
+      return setSuccess(t('login.resetSuccess'))
     }
 
     const fn = mode === MODES.signup ? signUpWithEmail : signInWithEmail
     const { error } = await fn(email, password)
     setBusy(false)
     if (error) return setError(error.message)
-    if (mode === MODES.signup) setSuccess('Account created! Check your email to confirm.')
+    if (mode === MODES.signup) setSuccess(t('login.signupSuccess'))
   }
 
   return (
     <div className="login-page">
+      <LanguageSwitcher variant="page" />
       <ThemeToggle variant="page" />
 
       <div className="login-card">
@@ -58,14 +62,14 @@ export default function Login() {
         </Link>
 
         <h1 className="login-title">
-          {mode === MODES.signin && 'Welcome back'}
-          {mode === MODES.signup && 'Create account'}
-          {mode === MODES.reset && 'Reset password'}
+          {mode === MODES.signin && t('login.welcomeBack')}
+          {mode === MODES.signup && t('login.createAccountTitle')}
+          {mode === MODES.reset && t('login.resetTitle')}
         </h1>
         <p className="login-sub">
-          {mode === MODES.signin && 'Sign in to continue practising'}
-          {mode === MODES.signup && 'Start your IELTS AI practice'}
-          {mode === MODES.reset && "We'll email you a reset link"}
+          {mode === MODES.signin && t('login.signInSub')}
+          {mode === MODES.signup && t('login.createAccountSub')}
+          {mode === MODES.reset && t('login.resetSub')}
         </p>
 
         {mode !== MODES.reset && (
@@ -81,7 +85,7 @@ export default function Login() {
                 <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                 <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
               </svg>
-              Continue with Google
+              {t('login.continueGoogle')}
             </button>
 
             <button
@@ -92,10 +96,10 @@ export default function Login() {
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
               </svg>
-              Continue with GitHub
+              {t('login.continueGithub')}
             </button>
 
-            <div className="login-divider"><span>or</span></div>
+            <div className="login-divider"><span>{t('login.or')}</span></div>
           </>
         )}
 
@@ -104,7 +108,7 @@ export default function Login() {
 
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-field">
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email">{t('login.email')}</label>
             <input
               id="email"
               type="email"
@@ -118,7 +122,7 @@ export default function Login() {
 
           {mode !== MODES.reset && (
             <div className="form-field">
-              <label htmlFor="password">Password</label>
+              <label htmlFor="password">{t('login.password')}</label>
               <input
                 id="password"
                 type="password"
@@ -132,10 +136,10 @@ export default function Login() {
           )}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={busy}>
-            {busy ? 'Please wait…' : (
-              mode === MODES.signin ? 'Sign in' :
-              mode === MODES.signup ? 'Create account' :
-              'Send reset link'
+            {busy ? t('login.pleaseWait') : (
+              mode === MODES.signin ? t('login.signInBtn') :
+              mode === MODES.signup ? t('login.createAccountBtn') :
+              t('login.sendResetBtn')
             )}
           </button>
         </form>
@@ -144,22 +148,22 @@ export default function Login() {
           {mode === MODES.signin && (
             <>
               <button className="link-btn" onClick={() => { setMode(MODES.signup); clear() }}>
-                Create account
+                {t('login.createAccountLink')}
               </button>
               <span>·</span>
               <button className="link-btn" onClick={() => { setMode(MODES.reset); clear() }}>
-                Forgot password?
+                {t('login.forgotPassword')}
               </button>
             </>
           )}
           {mode === MODES.signup && (
             <button className="link-btn" onClick={() => { setMode(MODES.signin); clear() }}>
-              Already have an account? Sign in
+              {t('login.alreadyHaveAccount')}
             </button>
           )}
           {mode === MODES.reset && (
             <button className="link-btn" onClick={() => { setMode(MODES.signin); clear() }}>
-              Back to sign in
+              {t('login.backToSignIn')}
             </button>
           )}
         </div>

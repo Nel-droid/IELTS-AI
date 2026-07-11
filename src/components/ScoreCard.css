@@ -1,0 +1,151 @@
+.score-card {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+/* ── Hero figure ── */
+.score-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding-bottom: 0.25rem;
+}
+
+.score-hero-circle {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.25rem;
+  font-weight: 800;
+  font-variant-numeric: normal;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+
+.score-hero-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+/* ── Criteria meters ── */
+.score-criteria {
+  display: flex;
+  flex-direction: column;
+  gap: 0.9rem;
+}
+
+.score-criterion {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.score-criterion-top {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.score-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.score-criterion-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--color-text-dark);
+  flex: 1;
+}
+
+.score-criterion-value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  font-variant-numeric: tabular-nums;
+  min-width: 1.5ch;
+  text-align: right;
+}
+
+.score-meter-track {
+  height: 8px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.score-meter-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s ease;
+}
+
+.score-criterion-feedback {
+  font-size: 0.86rem;
+  color: var(--color-text-dim);
+  line-height: 1.55;
+}
+
+/* ── Tier colors (status scale — fixed, never themed) ── */
+.band-fill-high { background: var(--color-band-high); color: var(--color-band-high-ink); }
+.band-fill-mid  { background: var(--color-band-mid);  color: var(--color-band-mid-ink); }
+.band-fill-low  { background: var(--color-band-low);  color: var(--color-band-low-ink); }
+
+.band-dot-high { background: var(--color-band-high); }
+.band-dot-mid  { background: var(--color-band-mid); }
+.band-dot-low  { background: var(--color-band-low); }
+
+.band-track-high { background: var(--color-band-high-bg); }
+.band-track-mid  { background: var(--color-band-mid-bg); }
+.band-track-low  { background: var(--color-band-low-bg); }
+
+/* ── Strengths / improvements ── */
+.score-list-section h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--color-text-dark);
+  margin-bottom: 0.5rem;
+}
+
+.score-list-section ul {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.score-list-item {
+  font-size: 0.86rem;
+  line-height: 1.5;
+  padding: 0.5rem 0.75rem 0.5rem 1.75rem;
+  border-radius: var(--radius);
+  position: relative;
+}
+
+.score-list-item::before {
+  position: absolute;
+  left: 0.65rem;
+  top: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.score-list-item--good {
+  background: var(--color-alert-success-bg);
+  color: var(--color-alert-success);
+}
+.score-list-item--good::before { content: '✓'; }
+
+.score-list-item--improve {
+  background: var(--color-band-mid-bg);
+  color: var(--color-band-mid);
+}
+.score-list-item--improve::before { content: '→'; }

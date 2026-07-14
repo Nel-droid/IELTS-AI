@@ -4,11 +4,17 @@ import './ScoreCard.css'
 export function ScoreCard({ criteria, strengths, improvements, overallLabel, strengthsLabel, improvementsLabel }) {
   const overall = computeOverallBand(criteria.map(c => c.score))
   const overallTier = bandTier(overall)
+  const ringPct = Math.min(100, Math.max(0, (overall / 9) * 100))
 
   return (
     <div className="score-card">
       <div className="score-hero">
-        <div className={`score-hero-circle band-fill-${overallTier}`}>{overall}</div>
+        <div
+          className={`score-hero-ring band-ring-${overallTier}`}
+          style={{ '--ring-pct': `${ringPct}%` }}
+        >
+          <div className={`score-hero-circle band-fill-${overallTier}`}>{overall}</div>
+        </div>
         <span className="score-hero-label">{overallLabel}</span>
       </div>
 
@@ -26,6 +32,13 @@ export function ScoreCard({ criteria, strengths, improvements, overallLabel, str
                 <div className={`score-meter-fill band-fill-${tier}`} style={{ width: `${(c.score / 9) * 100}%` }} />
               </div>
               {c.feedback && <p className="score-criterion-feedback">{c.feedback}</p>}
+              {c.examples?.length > 0 && (
+                <ul className="score-criterion-examples">
+                  {c.examples.map((ex, i) => (
+                    <li key={i}><span className="sc-quote">"{ex.quote}"</span> — {ex.issue}</li>
+                  ))}
+                </ul>
+              )}
             </div>
           )
         })}

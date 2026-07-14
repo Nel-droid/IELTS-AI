@@ -9,30 +9,46 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  padding-bottom: 0.25rem;
+  gap: 0.65rem;
+  padding-bottom: 0.5rem;
 }
 
+.score-hero-ring {
+  width: 112px;
+  height: 112px;
+  border-radius: 50%;
+  padding: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: conic-gradient(var(--ring-color) var(--ring-pct), var(--color-border) 0);
+  transition: background 0.6s ease;
+}
+.band-ring-high { --ring-color: var(--color-band-high); }
+.band-ring-mid  { --ring-color: var(--color-band-mid); }
+.band-ring-low  { --ring-color: var(--color-band-low); }
+
 .score-hero-circle {
-  width: 92px;
-  height: 92px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-family: var(--font-display);
   font-size: 2.25rem;
-  font-weight: 800;
+  font-weight: 700;
   font-variant-numeric: normal;
   line-height: 1;
   box-shadow: var(--shadow);
 }
 
 .score-hero-label {
-  font-size: 0.8rem;
-  font-weight: 600;
+  font-size: 0.78rem;
+  font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
-  letter-spacing: 0.04em;
+  letter-spacing: 0.06em;
 }
 
 /* ── Criteria meters ── */
@@ -62,7 +78,8 @@
 }
 
 .score-criterion-label {
-  font-size: 0.88rem;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
   font-weight: 600;
   color: var(--color-text-dark);
   flex: 1;
@@ -78,7 +95,7 @@
 }
 
 .score-meter-track {
-  height: 8px;
+  height: 7px;
   border-radius: 4px;
   overflow: hidden;
 }
@@ -93,6 +110,29 @@
   font-size: 0.86rem;
   color: var(--color-text-dim);
   line-height: 1.55;
+}
+
+.score-criterion-examples {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.score-criterion-examples li {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: var(--color-text-dim);
+  background: var(--color-card-alt);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+}
+
+.sc-quote {
+  font-style: italic;
+  color: var(--color-text);
+  font-weight: 600;
 }
 
 /* ── Tier colors (status scale — fixed, never themed) ── */

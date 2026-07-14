@@ -1,95 +1,12 @@
-import { useEffect, useRef, useState, useCallback } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLanguage } from '../../context/LanguageContext'
-import { evaluateSpeakingAudio } from '../../lib/groq'
-import { blobToBase64 } from '../../lib/ielts'
+import { evaluateSpeakingAudio, generateSpeakingTest } from '../../lib/groq'
+import { blobToBase64, micErrorMessage } from '../../lib/ielts'
+import { useAudioRecorder } from '../../hooks/useAudioRecorder'
 import { ScoreCard } from '../../components/ScoreCard'
 import './SpeakingPanel.css'
 
-const PART_QUESTIONS = {
-  1: [
-    "Let's talk about your hometown. Can you describe it for me?",
-    "What do you like most about living there?",
-    "Do you prefer to spend your free time indoors or outdoors? Why?",
-    "How do you usually spend your weekends?",
-  ],
-  2: [
-    `Describe a time when you helped someone.
-You should say:
-• who you helped
-• what you did to help them
-• why they needed help
-And explain how you felt about helping this person.`,
-  ],
-  3: [
-    "Why do you think some people are more willing to help others than others?",
-    "In what ways can a society encourage people to help each other more?",
-    "How has the way people help each other changed compared to the past?",
-  ],
-}
-
-const CANDIDATE_MIME_TYPES = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4', 'audio/ogg;codecs=opus']
-
-function pickMimeType() {
-  if (typeof MediaRecorder === 'undefined') return null
-  return CANDIDATE_MIME_TYPES.find(t => MediaRecorder.isTypeSupported(t)) || ''
-}
-
-function useAudioRecorder() {
-  const [status, setStatus] = useState('idle') // idle | recording | recorded
-  const [seconds, setSeconds] = useState(0)
-  const [blob, setBlob] = useState(null)
-  const [mimeType, setMimeType] = useState('')
-  const [error, setError] = useState('')
-  const mediaRecorderRef = useRef(null)
-  const chunksRef = useRef([])
-  const streamRef = useRef(null)
-  const timerRef = useRef(null)
-
-  const start = useCallback(async () => {
-    setError('')
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      streamRef.current = stream
-      const type = pickMimeType()
-      const recorder = type ? new MediaRecorder(stream, { mimeType: type }) : new MediaRecorder(stream)
-      chunksRef.current = []
-      recorder.ondataavailable = e => { if (e.data.size > 0) chunksRef.current.push(e.data) }
-      recorder.onstop = () => {
-        const finalType = recorder.mimeType || type || 'audio/webm'
-        setBlob(new Blob(chunksRef.current, { type: finalType }))
-        setMimeType(finalType)
-        setStatus('recorded')
-        streamRef.current?.getTracks().forEach(t => t.stop())
-      }
-      recorder.start()
-      mediaRecorderRef.current = recorder
-      setStatus('recording')
-      setSeconds(0)
-      timerRef.current = setInterval(() => setSeconds(s => s + 1), 1000)
-    } catch {
-      setError('mic-denied')
-    }
-  }, [])
-
-  const stop = useCallback(() => {
-    clearInterval(timerRef.current)
-    mediaRecorderRef.current?.stop()
-  }, [])
-
-  const reset = useCallback(() => {
-    clearInterval(timerRef.current)
-    setStatus('idle')
-    setBlob(null)
-    setSeconds(0)
-  }, [])
-
-  useEffect(() => () => {
-    clearInterval(timerRef.current)
-    streamRef.current?.getTracks().forEach(t => t.stop())
-  }, [])
-
-  return { status, seconds, blob, mimeType, error, start, stop, reset }
-}
+const MIN_RECORDING_SECONDS = 1
 
 function fmt(s) {
   const m = Math.floor(s / 60)
@@ -100,7 +17,10 @@ function fmt(s) {
 const CRITERIA_KEYS = ['fluencyCoherence', 'lexicalResource', 'grammaticalRange', 'pronunciation']
 
 export default function SpeakingPanel({ onResult }) {
-  const { t } = useLanguage()
+  const { t, lang } = useLanguage()
+  const [testData, setTestData] = useState(null)
+  const [loadingTest, setLoadingTest] = useState(false)
+  const [genError, setGenError] = useState('')
   const [started, setStarted] = useState(false)
   const [partNum, setPartNum] = useState(1)
   const [qIdx, setQIdx] = useState(0)
@@ -108,13 +28,27 @@ export default function SpeakingPanel({ onResult }) {
   const [prepTime, setPrepTime] = useState(0)
   const [evaluating, setEvaluating] = useState(false)
   const [evalError, setEvalError] = useState('')
+  const [recordWarning, setRecordWarning] = useState('')
   const [result, setResult] = useState(null)
+  const [silentReason, setSilentReason] = useState('')
   const recorder = useAudioRecorder()
   const prepRef = useRef(null)
 
+  const part1List = testData?.part1.flatMap(topic => topic.questions.map(q => ({ topic: topic.topic, question: q }))) ?? []
+  const part3List = testData?.part3 ?? []
+
+  const current =
+    partNum === 1 ? part1List[qIdx]
+    : partNum === 2 ? { topic: testData?.part2.topic, question: testData?.part2.cueCard }
+    : { topic: testData?.part2.topic, question: part3List[qIdx] }
+
   const partLabel = t('speaking.partLabels')[partNum - 1]
-  const question = PART_QUESTIONS[partNum][qIdx]
-  const isLastQuestionOfPart = qIdx === PART_QUESTIONS[partNum].length - 1
+  const question = current?.question
+  const topicLabel = current?.topic
+  const isLastQuestionOfPart =
+    partNum === 1 ? qIdx === part1List.length - 1
+    : partNum === 2 ? true
+    : qIdx === part3List.length - 1
   const isFinalQuestion = partNum === 3 && isLastQuestionOfPart
 
   const startPart2Prep = () => {
@@ -127,14 +61,33 @@ export default function SpeakingPanel({ onResult }) {
     }, 1000)
   }
 
-  const begin = () => {
-    setStarted(true)
-    setPartNum(1)
-    setQIdx(0)
+  const begin = async () => {
+    setLoadingTest(true)
+    setGenError('')
+    try {
+      const data = await generateSpeakingTest()
+      setTestData(data)
+      setResult(null)
+      setSilentReason('')
+      setAnswers([])
+      setStarted(true)
+      setPartNum(1)
+      setQIdx(0)
+    } catch (err) {
+      setGenError(err.message || t('speaking.genFailed'))
+    } finally {
+      setLoadingTest(false)
+    }
   }
 
   const advance = async () => {
     if (!recorder.blob) return
+    if (recorder.seconds < MIN_RECORDING_SECONDS) {
+      setRecordWarning(t('speaking.tooShort'))
+      recorder.reset()
+      return
+    }
+    setRecordWarning('')
     const audioBase64 = await blobToBase64(recorder.blob)
     const newAnswer = { partLabel, question, audioBase64, mimeType: recorder.mimeType }
     const nextAnswers = [...answers, newAnswer]
@@ -160,9 +113,13 @@ export default function SpeakingPanel({ onResult }) {
     setEvaluating(true)
     setEvalError('')
     try {
-      const data = await evaluateSpeakingAudio({ answers: finalAnswers })
-      setResult(data)
-      onResult?.(data)
+      const data = await evaluateSpeakingAudio({ answers: finalAnswers, language: lang })
+      if (data.insufficient) {
+        setSilentReason(data.insufficientReason)
+      } else {
+        setResult(data)
+        onResult?.(data)
+      }
     } catch (err) {
       setEvalError(err.message || t('speaking.evalFailed'))
     } finally {
@@ -179,6 +136,7 @@ export default function SpeakingPanel({ onResult }) {
       label: criteriaLabels[i],
       score: result.criteria[key]?.score,
       feedback: result.criteria[key]?.feedback,
+      examples: result.criteria[key]?.examples,
     })).filter(c => c.score != null)
 
     return (
@@ -191,6 +149,15 @@ export default function SpeakingPanel({ onResult }) {
           strengthsLabel={t('speaking.strengths')}
           improvementsLabel={t('speaking.improvements')}
         />
+      </div>
+    )
+  }
+
+  if (silentReason) {
+    return (
+      <div className="sp-card">
+        <div className="sp-error">{silentReason}</div>
+        <button className="btn btn-primary" onClick={begin}>{t('speaking.retakeTest')}</button>
       </div>
     )
   }
@@ -209,6 +176,24 @@ export default function SpeakingPanel({ onResult }) {
       <div className="sp-card">
         <div className="sp-error">{evalError}</div>
         <button className="btn btn-outline" onClick={() => runEvaluation(answers)}>{t('speaking.tryAgain')}</button>
+      </div>
+    )
+  }
+
+  if (loadingTest) {
+    return (
+      <div className="sp-card sp-card--center">
+        <span className="spinner spinner--dark" />
+        <p>{t('speaking.preparingTest')}</p>
+      </div>
+    )
+  }
+
+  if (genError) {
+    return (
+      <div className="sp-card">
+        <div className="sp-error">{genError}</div>
+        <button className="btn btn-outline" onClick={begin}>{t('speaking.tryAgain')}</button>
       </div>
     )
   }
@@ -251,15 +236,16 @@ export default function SpeakingPanel({ onResult }) {
       ) : (
         <>
           <div className="sp-question">
-            <span className="sp-question-label">{partLabel}</span>
+            <span className="sp-question-label">{partLabel}{topicLabel ? ` · ${topicLabel}` : ''}</span>
             <p className="sp-question-text">{question}</p>
           </div>
 
-          {recorder.error && <div className="sp-error">{t('speaking.micNotSupported')}</div>}
+          {recorder.error && <div className="sp-error">{micErrorMessage(t, recorder.error)}</div>}
+          {recordWarning && <div className="sp-error">{recordWarning}</div>}
 
           <div className="sp-recorder">
             {recorder.status === 'idle' && (
-              <button className="sp-record-btn" onClick={recorder.start}>
+              <button className="sp-record-btn" onClick={() => { setRecordWarning(''); recorder.start() }}>
                 <span className="sp-record-dot" /> {t('speaking.recordAnswer')}
               </button>
             )}

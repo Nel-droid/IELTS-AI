@@ -39,16 +39,23 @@ export function AuthProvider({ children }) {
 
   const signOut = () => supabase.auth.signOut()
 
+  const changePassword = (newPassword) =>
+    supabase.auth.updateUser({ password: newPassword })
+
+  const hasPasswordAuth = (session?.user?.app_metadata?.providers ?? []).includes('email')
+
   return (
     <AuthContext.Provider value={{
       session,
       user: session?.user ?? null,
       loading: session === undefined,
+      hasPasswordAuth,
       signInWithGoogle,
       signInWithGitHub,
       signInWithEmail,
       signUpWithEmail,
       resetPassword,
+      changePassword,
       signOut,
     }}>
       {children}

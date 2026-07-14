@@ -27,3 +27,12 @@ export function fileToBase64(file) {
 export function blobToBase64(blob) {
   return fileToBase64(blob)
 }
+
+// Maps a useAudioRecorder() error code to the right translated message,
+// since "permission denied" and "no microphone" need different instructions
+// than a genuinely unsupported browser.
+export function micErrorMessage(t, code) {
+  if (code === 'permission-denied') return t('speaking.micPermissionDenied')
+  if (code === 'no-device') return t('speaking.micNoDevice')
+  return t('speaking.micNotSupported')
+}

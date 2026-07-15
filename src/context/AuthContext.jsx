@@ -42,6 +42,9 @@ export function AuthProvider({ children }) {
   const changePassword = (newPassword) =>
     supabase.auth.updateUser({ password: newPassword })
 
+  const updateDisplayName = (name) =>
+    supabase.auth.updateUser({ data: { name } })
+
   const hasPasswordAuth = (session?.user?.app_metadata?.providers ?? []).includes('email')
 
   return (
@@ -56,6 +59,7 @@ export function AuthProvider({ children }) {
       signUpWithEmail,
       resetPassword,
       changePassword,
+      updateDisplayName,
       signOut,
     }}>
       {children}

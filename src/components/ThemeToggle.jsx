@@ -1,4 +1,5 @@
 import { useTheme } from '../context/ThemeContext'
+import { IconSun, IconMoon } from './icons'
 
 export function ThemeToggle({ variant = 'nav' }) {
   const { theme, toggle } = useTheme()
@@ -9,7 +10,7 @@ export function ThemeToggle({ variant = 'nav' }) {
       aria-label={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {theme === 'dark' ? <IconSun /> : <IconMoon />}
     </button>
   )
 }

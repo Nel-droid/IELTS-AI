@@ -117,6 +117,13 @@
   font-family: var(--font);
   font-size: 0.9rem;
 }
+
+.settings-inline-form {
+  display: flex;
+  gap: 0.5rem;
+}
+.settings-inline-form input { flex: 1; min-width: 0; }
+.settings-inline-form .btn { flex-shrink: 0; }
 .settings-field input:disabled { opacity: 0.6; background: var(--color-card-alt); }
 
 .settings-avatar-row {

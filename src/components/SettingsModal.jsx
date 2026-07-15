@@ -65,13 +65,18 @@ function SectionTitle({ children }) {
 
 function ProfileSection() {
   const { t } = useLanguage()
-  const { user, signOut } = useAuth()
+  const { user, signOut, updateDisplayName } = useAuth()
   const fileRef = useRef(null)
   const [uploading, setUploading] = useState(false)
   const [error, setError] = useState('')
   const avatarUrl = user?.user_metadata?.avatar_url
   const displayName = user?.user_metadata?.name ?? user?.email?.split('@')[0] ?? ''
   const initial = displayName.charAt(0).toUpperCase()
+
+  const [name, setName] = useState(displayName)
+  const [savingName, setSavingName] = useState(false)
+  const [nameError, setNameError] = useState('')
+  const [nameSuccess, setNameSuccess] = useState('')
 
   const handleFile = async (e) => {
     const file = e.target.files?.[0]
@@ -86,6 +91,20 @@ function ProfileSection() {
       setUploading(false)
       e.target.value = ''
     }
+  }
+
+  const handleSaveName = async (e) => {
+    e.preventDefault()
+    setNameError('')
+    setNameSuccess('')
+    const trimmed = name.trim()
+    if (!trimmed) return setNameError(t('settings.nameRequired'))
+    if (trimmed === displayName) return
+    setSavingName(true)
+    const { error } = await updateDisplayName(trimmed)
+    setSavingName(false)
+    if (error) return setNameError(error.message)
+    setNameSuccess(t('settings.nameUpdated'))
   }
 
   return (
@@ -111,10 +130,20 @@ function ProfileSection() {
         <label>{t('login.email')}</label>
         <input type="text" value={user?.email ?? ''} disabled />
       </div>
-      <div className="settings-field">
+
+      <form className="settings-field" onSubmit={handleSaveName}>
         <label>{t('settings.displayName')}</label>
-        <input type="text" value={displayName} disabled />
-      </div>
+        <div className="settings-inline-form">
+          <input type="text" value={name} onChange={e => { setName(e.target.value); setNameSuccess('') }} placeholder={t('settings.displayName')} />
+          <button type="submit" className="btn btn-primary btn-sm" disabled={savingName || !name.trim() || name.trim() === displayName}>
+            {savingName ? t('login.pleaseWait') : t('settings.save')}
+          </button>
+        </div>
+        {nameError && <div className="settings-error">{nameError}</div>}
+        {nameSuccess && <div className="settings-success">{nameSuccess}</div>}
+      </form>
+
+      <p className="settings-hint">{t('settings.passwordHint')}</p>
 
       <button className="btn btn-ghost btn-sm settings-signout" onClick={signOut}>
         <IconLogOut /> {t('nav.signOut')}

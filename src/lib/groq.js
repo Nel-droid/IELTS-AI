@@ -1,10 +1,12 @@
-import Groq from 'groq-sdk'
-
-const groq = new Groq({ apiKey: import.meta.env.VITE_GROQ_API_KEY, dangerouslyAllowBrowser: true })
+// All Groq API calls go through our own server-side proxy (netlify/edge-functions/
+// groq-chat.ts and groq-transcribe.ts) instead of calling api.groq.com directly.
+// The real Groq API key lives only on the server; the browser never sees it.
+// Every call is authenticated with the user's Supabase session and rate-limited
+// per user server-side.
+import { supabase } from './supabase'
 
 const TEXT_MODEL = 'meta-llama/llama-4-scout-17b-16e-instruct' // supports text + image input
 const FAST_TEXT_MODEL = 'llama-3.1-8b-instant' // smaller/faster, chat only — writing/speaking scoring always uses TEXT_MODEL
-const TRANSCRIBE_MODEL = 'whisper-large-v3-turbo'
 
 const WHOLE_SCORE_RULE = `Every criterion score MUST be a whole integer band from 1 to 9 (e.g. 6, 7, 8) — never a half band like 6.5 or 7.5. Do not include an "overall" field; it is computed separately.`
 const CHAT_LANGUAGE_NAMES = { en: 'English', uz: 'Uzbek', ru: 'Russian' }
@@ -13,21 +15,43 @@ const HUMAN_TONE_RULE = `Write like a real person talking to the student, not li
 
 const TERMINOLOGY_RULE = `Keep official IELTS terminology in English even when the rest of your reply is in another language — skill names (Writing, Speaking, Reading, Listening), task labels (Task 1, Task 2, Academic, General Training), part labels (Part 1, Part 2, Part 3), band-score terms (Overall Band, Band 7, whole-number band), and criteria names (Task Achievement, Coherence & Cohesion, Lexical Resource, Grammatical Range & Accuracy, Fluency & Coherence, Pronunciation). These are fixed exam terms students need to recognize from the real test — translating them changes or loses their meaning, so weave them into the sentence in English exactly as written, not a local-language equivalent.`
 
-function base64ToBlob(base64, mimeType) {
-  const binary = atob(base64)
-  const bytes = new Uint8Array(binary.length)
-  for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i)
-  return new Blob([bytes], { type: mimeType })
+// ── Proxy plumbing ──────────────────────────────────────────────────────────
+
+async function authHeaders() {
+  const { data: { session } } = await supabase.auth.getSession()
+  if (!session?.access_token) throw new Error('You need to be signed in to use the AI features.')
+  return { Authorization: `Bearer ${session.access_token}` }
 }
 
-async function jsonChat({ systemInstruction, content }) {
-  const completion = await groq.chat.completions.create({
-    model: TEXT_MODEL,
+async function proxyFetch(path, options) {
+  const headers = { ...(options.headers || {}), ...(await authHeaders()) }
+  const res = await fetch(path, { ...options, headers })
+  if (!res.ok) {
+    if (res.status === 429) throw new Error('You’re sending requests too fast — please wait a few minutes and try again.')
+    const errBody = await res.json().catch(() => null)
+    throw new Error(errBody?.error || `Request failed (${res.status})`)
+  }
+  return res
+}
+
+async function chatCompletion({ model, messages, response_format, temperature }) {
+  const res = await proxyFetch('/api/groq-chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages, response_format, temperature }),
+  })
+  return res.json()
+}
+
+async function jsonChat({ systemInstruction, content, model = TEXT_MODEL, temperature }) {
+  const completion = await chatCompletion({
+    model,
     messages: [
       { role: 'system', content: systemInstruction },
       { role: 'user', content },
     ],
     response_format: { type: 'json_object' },
+    temperature,
   })
   return JSON.parse(completion.choices[0].message.content)
 }
@@ -96,15 +120,13 @@ export async function evaluateWritingFreeform({ images = [], texts = [], languag
 // ── Speaking evaluation (audio -> transcript -> scored) ───────────────────
 
 export async function transcribeAudio(base64, mimeType) {
-  const blob = base64ToBlob(base64, mimeType)
-  const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm'
-  const file = new File([blob], `answer.${ext}`, { type: mimeType })
-  const result = await groq.audio.transcriptions.create({
-    file,
-    model: TRANSCRIBE_MODEL,
-    response_format: 'text',
+  const res = await proxyFetch('/api/groq-transcribe', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ base64, mimeType }),
   })
-  return typeof result === 'string' ? result : result.text
+  const data = await res.json()
+  return data.text
 }
 
 // ── Dynamic Speaking test generation (fresh topics every attempt) ─────────
@@ -135,7 +157,7 @@ Return ONLY valid JSON in this exact shape, no markdown fences, no extra comment
 
 export async function generateSpeakingTest() {
   const firstTopic = SPEAKING_FIRST_TOPICS[Math.floor(Math.random() * SPEAKING_FIRST_TOPICS.length)]
-  const completion = await groq.chat.completions.create({
+  const completion = await chatCompletion({
     model: TEXT_MODEL,
     messages: [
       { role: 'system', content: speakingTestSystem(firstTopic) },
@@ -238,7 +260,7 @@ function buildChatUserContent(message, images) {
 export async function sendChatMessage(chat, message, speed = 'balanced', images = []) {
   const model = images.length > 0 ? TEXT_MODEL : (speed === 'fastest' ? FAST_TEXT_MODEL : TEXT_MODEL)
   chat.history.push({ role: 'user', content: buildChatUserContent(message, images) })
-  const completion = await groq.chat.completions.create({ model, messages: chat.history })
+  const completion = await chatCompletion({ model, messages: chat.history })
   const reply = completion.choices[0].message.content
   chat.history.push({ role: 'assistant', content: reply })
   return reply
@@ -246,18 +268,49 @@ export async function sendChatMessage(chat, message, speed = 'balanced', images 
 
 // ── Streaming chat ────────────────────────────────────────────────────────
 
+// The proxy forwards Groq's raw Server-Sent-Events stream unchanged, so we
+// parse it client-side the same way the groq-sdk used to do internally.
+async function* parseSSEStream(body) {
+  const reader = body.getReader()
+  const decoder = new TextDecoder()
+  let buffer = ''
+  while (true) {
+    const { done, value } = await reader.read()
+    if (done) return
+    buffer += decoder.decode(value, { stream: true })
+    const lines = buffer.split('\n')
+    buffer = lines.pop() ?? ''
+    for (const line of lines) {
+      const trimmed = line.trim()
+      if (!trimmed.startsWith('data:')) continue
+      const payload = trimmed.slice(5).trim()
+      if (payload === '[DONE]') return
+      if (!payload) continue
+      try {
+        const parsed = JSON.parse(payload)
+        const delta = parsed.choices?.[0]?.delta?.content
+        if (delta) yield delta
+      } catch {
+        // ignore partial/malformed SSE fragments
+      }
+    }
+  }
+}
+
 export async function* streamChatMessage(chat, message, speed = 'balanced', images = []) {
   const model = images.length > 0 ? TEXT_MODEL : (speed === 'fastest' ? FAST_TEXT_MODEL : TEXT_MODEL)
   chat.history.push({ role: 'user', content: buildChatUserContent(message, images) })
-  const stream = await groq.chat.completions.create({ model, messages: chat.history, stream: true })
+
+  const res = await proxyFetch('/api/groq-chat', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model, messages: chat.history, stream: true }),
+  })
 
   let full = ''
-  for await (const chunk of stream) {
-    const delta = chunk.choices[0]?.delta?.content
-    if (delta) {
-      full += delta
-      yield delta
-    }
+  for await (const delta of parseSSEStream(res.body)) {
+    full += delta
+    yield delta
   }
   chat.history.push({ role: 'assistant', content: full })
 }

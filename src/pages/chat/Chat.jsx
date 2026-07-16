@@ -49,7 +49,7 @@ function looksLikeWritingSubmission(msg, attachments) {
 
 export default function Chat() {
   const { t, lang } = useLanguage()
-  const { aiStyle, aiSpeed, notifications, fontSize } = usePreferences()
+  const { aiStyle, aiSpeed, notifications, fontSize, chatBackground } = usePreferences()
   const { user } = useAuth()
   const { id } = useParams()
   const navigate = useNavigate()
@@ -409,12 +409,22 @@ export default function Chat() {
   const isEmptyConversation = messages.length === 1 && messages[0].role === 'assistant' && messages[0].type === 'text'
 
   return (
-    <div className={`chat-page chat-font--${fontSize}${isEmptyConversation ? ' chat-page--empty' : ''}`}>
-      <div className="chat-starfield" aria-hidden="true">
-        <span className="star-layer star-layer--1" />
-        <span className="star-layer star-layer--2" />
-        <span className="star-layer star-layer--3" />
-      </div>
+    <div className={`chat-page chat-bg--${chatBackground} chat-font--${fontSize}${isEmptyConversation ? ' chat-page--empty' : ''}`}>
+      {chatBackground === 'starfield' && (
+        <div className="chat-starfield" aria-hidden="true">
+          <span className="star-layer star-layer--1" />
+          <span className="star-layer star-layer--2" />
+          <span className="star-layer star-layer--3" />
+        </div>
+      )}
+      {chatBackground === 'aurora' && (
+        <div className="chat-aurora" aria-hidden="true">
+          <span className="aurora-blob aurora-blob--1" />
+          <span className="aurora-blob aurora-blob--2" />
+          <span className="aurora-blob aurora-blob--3" />
+        </div>
+      )}
+      {chatBackground === 'dotGrid' && <div className="chat-dotgrid" aria-hidden="true" />}
 
       <div className="chat-header">
         <div className="chat-header-title">

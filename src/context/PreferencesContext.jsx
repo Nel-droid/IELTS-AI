@@ -7,6 +7,7 @@ const KEYS = {
   aiStyle: 'ielts-ai-style',
   aiSpeed: 'ielts-ai-speed',
   notifications: 'ielts-ai-notifications',
+  chatBackground: 'ielts-ai-chat-background',
 }
 
 function readInitial(key, fallback) {
@@ -18,11 +19,13 @@ export function PreferencesProvider({ children }) {
   const [aiStyle, setAiStyle] = useState(() => readInitial(KEYS.aiStyle, 'encouraging'))
   const [aiSpeed, setAiSpeed] = useState(() => readInitial(KEYS.aiSpeed, 'balanced'))
   const [notifications, setNotifications] = useState(() => localStorage.getItem(KEYS.notifications) === 'true')
+  const [chatBackground, setChatBackground] = useState(() => readInitial(KEYS.chatBackground, 'starfield'))
 
   useEffect(() => { localStorage.setItem(KEYS.fontSize, fontSize) }, [fontSize])
   useEffect(() => { localStorage.setItem(KEYS.aiStyle, aiStyle) }, [aiStyle])
   useEffect(() => { localStorage.setItem(KEYS.aiSpeed, aiSpeed) }, [aiSpeed])
   useEffect(() => { localStorage.setItem(KEYS.notifications, String(notifications)) }, [notifications])
+  useEffect(() => { localStorage.setItem(KEYS.chatBackground, chatBackground) }, [chatBackground])
 
   const enableNotifications = async () => {
     if (typeof Notification === 'undefined') return false
@@ -39,6 +42,7 @@ export function PreferencesProvider({ children }) {
       aiStyle, setAiStyle,
       aiSpeed, setAiSpeed,
       notifications, setNotifications, enableNotifications,
+      chatBackground, setChatBackground,
     }}>
       {children}
     </PreferencesContext.Provider>

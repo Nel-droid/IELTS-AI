@@ -191,6 +191,72 @@
   color: #fff;
 }
 
+.settings-bg-picker {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.6rem;
+}
+
+.settings-bg-option {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.45rem;
+  padding: 0.5rem;
+  border: 1.5px solid var(--color-border);
+  border-radius: 10px;
+  background: var(--color-card);
+  color: var(--color-text-medium);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.settings-bg-option:hover { border-color: var(--color-primary); }
+.settings-bg-option.active {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.settings-bg-swatch {
+  height: 44px;
+  border-radius: 7px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  background-repeat: repeat;
+}
+
+.settings-bg-swatch--starfield {
+  background-color: #10131c;
+  background-image:
+    radial-gradient(1.4px 1.4px at 15% 30%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 45% 65%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 70% 20%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 85% 75%, #fff, transparent 100%),
+    radial-gradient(1.4px 1.4px at 30% 85%, #fff, transparent 100%);
+  background-size: 100% 100%;
+}
+
+.settings-bg-swatch--aurora {
+  background:
+    radial-gradient(ellipse 60% 60% at 25% 30%, rgba(139, 92, 246, 0.75), transparent 70%),
+    radial-gradient(ellipse 55% 55% at 75% 60%, rgba(52, 211, 153, 0.65), transparent 70%),
+    radial-gradient(ellipse 50% 50% at 55% 15%, rgba(77, 142, 222, 0.6), transparent 70%),
+    #10131c;
+}
+
+.settings-bg-swatch--dotGrid {
+  background-color: var(--color-card-alt);
+  background-image: radial-gradient(1.2px 1.2px at center, color-mix(in srgb, var(--color-primary) 60%, transparent) 100%, transparent 100%);
+  background-size: 11px 11px;
+}
+
+.settings-bg-swatch--off {
+  background: var(--color-card-alt);
+}
+
 .settings-form { display: flex; flex-direction: column; gap: 1rem; }
 
 .settings-error {

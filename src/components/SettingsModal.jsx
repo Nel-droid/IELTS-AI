@@ -155,7 +155,7 @@ function ProfileSection() {
 function AppearanceSection() {
   const { t } = useLanguage()
   const { theme, toggle } = useTheme()
-  const { fontSize, setFontSize } = usePreferences()
+  const { fontSize, setFontSize, chatBackground, setChatBackground } = usePreferences()
 
   return (
     <div className="settings-body">
@@ -179,6 +179,22 @@ function AppearanceSection() {
           {['small', 'medium', 'large'].map(size => (
             <button key={size} className={fontSize === size ? 'active' : ''} onClick={() => setFontSize(size)}>
               {t(`settings.fontSize.${size}`)}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="settings-field">
+        <label>{t('settings.chatBackground.label')}</label>
+        <div className="settings-bg-picker">
+          {['starfield', 'aurora', 'dotGrid', 'off'].map(bg => (
+            <button
+              key={bg}
+              className={`settings-bg-option${chatBackground === bg ? ' active' : ''}`}
+              onClick={() => setChatBackground(bg)}
+            >
+              <span className={`settings-bg-swatch settings-bg-swatch--${bg}`} />
+              {t(`settings.chatBackground.${bg}`)}
             </button>
           ))}
         </div>

@@ -94,6 +94,76 @@
   .star-layer { animation: none !important; }
 }
 
+/* Aurora background — soft blurred color blobs drifting behind the chat. */
+.chat-aurora {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.aurora-blob {
+  position: absolute;
+  width: 55%;
+  height: 55%;
+  border-radius: 50%;
+  filter: blur(70px);
+  opacity: 0.35;
+}
+
+.aurora-blob--1 {
+  top: -10%;
+  left: -5%;
+  background: #8b5cf6;
+  animation: aurora-drift-1 32s ease-in-out infinite;
+}
+.aurora-blob--2 {
+  bottom: -15%;
+  right: -5%;
+  background: #34d399;
+  animation: aurora-drift-2 38s ease-in-out infinite;
+}
+.aurora-blob--3 {
+  top: 30%;
+  left: 35%;
+  background: #4d8ede;
+  animation: aurora-drift-3 26s ease-in-out infinite;
+}
+
+[data-theme="dark"] .aurora-blob { opacity: 0.4; }
+
+@keyframes aurora-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(6%, 8%) scale(1.12); }
+}
+@keyframes aurora-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-7%, -6%) scale(1.1); }
+}
+@keyframes aurora-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-5%, 7%) scale(1.08); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .aurora-blob { animation: none !important; }
+}
+
+/* Dot grid background — calm, static, evenly spaced dots (no motion). */
+.chat-dotgrid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: radial-gradient(1.3px 1.3px at center, rgba(var(--star-color), 0.5), transparent 100%);
+  background-size: 24px 24px;
+}
+
+[data-theme="dark"] .chat-dotgrid {
+  background-image: radial-gradient(1.3px 1.3px at center, rgba(var(--star-color), 0.35), transparent 100%);
+}
+
 .chat-loading {
   display: flex;
   align-items: center;

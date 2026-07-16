@@ -20,7 +20,7 @@
    intercepts clicks. Built from tiled radial-gradient dots instead of DOM
    nodes so it stays cheap regardless of chat length. */
 .chat-starfield {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -96,7 +96,7 @@
 
 /* Aurora background — soft blurred color blobs drifting behind the chat. */
 .chat-aurora {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -152,7 +152,7 @@
 
 /* Dot grid background — calm, static, evenly spaced dots (no motion). */
 .chat-dotgrid {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
@@ -168,7 +168,7 @@
    one soft flicker every 9-13s) and capped well below strobe-flash
    thresholds so it stays comfortable in a study app. */
 .chat-lightning {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -238,7 +238,7 @@
 
 /* Waves — soft rolling bands anchored to the bottom edge. */
 .chat-waves {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -289,7 +289,7 @@
 
 /* Bokeh — soft blurred colored circles drifting like out-of-focus lights. */
 .chat-bokeh {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -338,7 +338,7 @@
 
 /* Snowfall — soft dots drifting straight down, seamless-looped. */
 .chat-snowfall {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   overflow: hidden;
@@ -401,7 +401,7 @@
 
 /* Grid lines — faint drifting graph-paper grid. */
 .chat-gridlines {
-  position: absolute;
+  position: fixed;
   inset: -5%;
   z-index: -1;
   pointer-events: none;
@@ -427,7 +427,7 @@
 
 /* Gradient wave — smooth flowing color wash. */
 .chat-gradientwave {
-  position: absolute;
+  position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;

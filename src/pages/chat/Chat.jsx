@@ -41,10 +41,20 @@ function welcomeMsg(t, displayName) {
 // "Task 1/2" label (how a pasted task prompt is normally formatted). This must
 // stay narrow — a question that merely *mentions* "task 1" mid-sentence (e.g.
 // "how can I improve my task 1?") should still get answered as normal chat.
+// Reading/Listening submissions are long too, but carry markers a real essay
+// never does (answer-format labels, explicit "Passage"/"Transcript"/"Questions"
+// headers) — checked first so they route to normal chat (which now answers
+// them directly) instead of being swallowed by the Writing scorer.
+function looksLikeReadingOrListeningSubmission(msg) {
+  return /true\s*\/\s*false\s*\/\s*not given|yes\s*\/\s*no\s*\/\s*not given|^\s*(passage|transcript|questions?)\s*:/im.test(msg)
+}
+
 function looksLikeWritingSubmission(msg, attachments) {
   if (attachments.length > 0) return true
-  if (msg.trim().split(/\s+/).filter(Boolean).length >= 40) return true
-  return /^task\s*[12]\b/i.test(msg.trim())
+  const trimmed = msg.trim()
+  if (looksLikeReadingOrListeningSubmission(trimmed)) return false
+  if (trimmed.split(/\s+/).filter(Boolean).length >= 40) return true
+  return /^task\s*[12]\b/i.test(trimmed)
 }
 
 export default function Chat() {
@@ -255,11 +265,12 @@ export default function Chat() {
         language: lang,
       })
 
-      if (result.insufficient) {
+      if (result.insufficient || !result.criteria) {
+        const content = result.insufficientReason || t('writing.errorFallback')
         setMessages(prev => prev.map(m => m.id === placeholderId
-          ? { id: placeholderId, role: 'assistant', type: 'text', content: result.insufficientReason }
+          ? { id: placeholderId, role: 'assistant', type: 'text', content }
           : m))
-        persistText(convoId, 'assistant', result.insufficientReason)
+        persistText(convoId, 'assistant', content)
       } else {
         setMessages(prev => prev.filter(m => m.id !== placeholderId))
         const followup = t('chat.toolFollowup')

@@ -1,4 +1,6 @@
 .chat-page {
+  position: relative;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -6,6 +8,90 @@
   margin: 0 auto;
   width: 100%;
   padding: 0 2rem;
+  --star-color: 77, 100, 210;
+}
+
+[data-theme="dark"] .chat-page {
+  --star-color: 255, 255, 255;
+}
+
+/* Animated starfield background — sits behind the header/messages/composer
+   (negative z-index within chat-page's own stacking context) and never
+   intercepts clicks. Built from tiled radial-gradient dots instead of DOM
+   nodes so it stays cheap regardless of chat length. */
+.chat-starfield {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.star-layer {
+  position: absolute;
+  inset: -20%;
+  background-repeat: repeat;
+}
+
+.star-layer--1 {
+  background-image:
+    radial-gradient(1.3px 1.3px at 8% 15%, rgba(var(--star-color), 0.9), transparent 100%),
+    radial-gradient(1px 1px at 32% 42%, rgba(var(--star-color), 0.8), transparent 100%),
+    radial-gradient(1.4px 1.4px at 58% 12%, rgba(var(--star-color), 0.85), transparent 100%),
+    radial-gradient(1px 1px at 78% 55%, rgba(var(--star-color), 0.75), transparent 100%),
+    radial-gradient(1.2px 1.2px at 92% 28%, rgba(var(--star-color), 0.8), transparent 100%),
+    radial-gradient(1px 1px at 18% 78%, rgba(var(--star-color), 0.7), transparent 100%);
+  background-size: 220px 220px;
+  opacity: 0.22;
+  animation: star-drift-1 150s linear infinite, star-twinkle 5s ease-in-out infinite;
+}
+
+.star-layer--2 {
+  background-image:
+    radial-gradient(1.6px 1.6px at 15% 35%, rgba(var(--star-color), 0.85), transparent 100%),
+    radial-gradient(1.2px 1.2px at 45% 8%, rgba(var(--star-color), 0.75), transparent 100%),
+    radial-gradient(1.8px 1.8px at 70% 60%, rgba(var(--star-color), 0.8), transparent 100%),
+    radial-gradient(1.2px 1.2px at 88% 82%, rgba(var(--star-color), 0.7), transparent 100%),
+    radial-gradient(1.4px 1.4px at 5% 92%, rgba(var(--star-color), 0.75), transparent 100%);
+  background-size: 320px 320px;
+  opacity: 0.16;
+  animation: star-drift-2 210s linear infinite, star-twinkle 7s ease-in-out infinite 1.5s;
+}
+
+.star-layer--3 {
+  background-image:
+    radial-gradient(2.2px 2.2px at 25% 25%, rgba(var(--star-color), 0.8), transparent 100%),
+    radial-gradient(1.8px 1.8px at 62% 48%, rgba(var(--star-color), 0.7), transparent 100%),
+    radial-gradient(2px 2px at 85% 15%, rgba(var(--star-color), 0.75), transparent 100%),
+    radial-gradient(1.8px 1.8px at 10% 65%, rgba(var(--star-color), 0.65), transparent 100%);
+  background-size: 440px 440px;
+  opacity: 0.1;
+  animation: star-drift-3 280s linear infinite, star-twinkle 9s ease-in-out infinite 3s;
+}
+
+[data-theme="dark"] .star-layer--1 { opacity: 0.55; }
+[data-theme="dark"] .star-layer--2 { opacity: 0.4; }
+[data-theme="dark"] .star-layer--3 { opacity: 0.28; }
+
+@keyframes star-drift-1 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-110px, -70px, 0); }
+}
+@keyframes star-drift-2 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(90px, -60px, 0); }
+}
+@keyframes star-drift-3 {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-60px, 50px, 0); }
+}
+@keyframes star-twinkle {
+  0%, 100% { filter: brightness(1); }
+  50% { filter: brightness(1.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .star-layer { animation: none !important; }
 }
 
 .chat-loading {

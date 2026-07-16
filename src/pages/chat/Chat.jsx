@@ -410,6 +410,12 @@ export default function Chat() {
 
   return (
     <div className={`chat-page chat-font--${fontSize}${isEmptyConversation ? ' chat-page--empty' : ''}`}>
+      <div className="chat-starfield" aria-hidden="true">
+        <span className="star-layer star-layer--1" />
+        <span className="star-layer star-layer--2" />
+        <span className="star-layer star-layer--3" />
+      </div>
+
       <div className="chat-header">
         <div className="chat-header-title">
           <span className="chat-header-icon"><IconStudio /></span>

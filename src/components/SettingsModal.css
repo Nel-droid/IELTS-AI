@@ -193,7 +193,7 @@
 
 .settings-bg-picker {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
   gap: 0.6rem;
 }
 
@@ -255,6 +255,49 @@
 
 .settings-bg-swatch--off {
   background: var(--color-card-alt);
+}
+
+.settings-bg-swatch--lightning {
+  background:
+    radial-gradient(ellipse 40% 60% at 62% 35%, rgba(255, 255, 255, 0.85), transparent 70%),
+    linear-gradient(160deg, #3a4152, #1a1e29 70%);
+}
+
+.settings-bg-swatch--waves {
+  background:
+    repeating-linear-gradient(100deg, rgba(255,255,255,0.12) 0 3px, transparent 3px 9px),
+    linear-gradient(180deg, #bfe3f5 0%, #4d8ede 55%, #1a56a4 100%);
+}
+
+.settings-bg-swatch--bokeh {
+  background:
+    radial-gradient(circle 8px at 20% 30%, rgba(139, 92, 246, 0.85), transparent 70%),
+    radial-gradient(circle 6px at 45% 60%, rgba(77, 142, 222, 0.8), transparent 70%),
+    radial-gradient(circle 9px at 72% 25%, rgba(52, 211, 153, 0.75), transparent 70%),
+    radial-gradient(circle 7px at 80% 70%, rgba(251, 191, 36, 0.7), transparent 70%),
+    #14161f;
+}
+
+.settings-bg-swatch--snowfall {
+  background-color: #3a4a5c;
+  background-image:
+    radial-gradient(2px 2px at 20% 25%, #fff, transparent 100%),
+    radial-gradient(1.6px 1.6px at 50% 55%, #fff, transparent 100%),
+    radial-gradient(2px 2px at 75% 30%, #fff, transparent 100%),
+    radial-gradient(1.6px 1.6px at 85% 70%, #fff, transparent 100%),
+    radial-gradient(2px 2px at 35% 80%, #fff, transparent 100%);
+  background-size: 100% 100%;
+}
+
+.settings-bg-swatch--gridLines {
+  background-color: #14161f;
+  background-image:
+    repeating-linear-gradient(0deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 9px),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.18) 0 1px, transparent 1px 9px);
+}
+
+.settings-bg-swatch--gradientWave {
+  background: linear-gradient(120deg, #667eea, #f093fb 45%, #4facfe 100%);
 }
 
 .settings-form { display: flex; flex-direction: column; gap: 1rem; }

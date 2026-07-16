@@ -425,6 +425,35 @@ export default function Chat() {
         </div>
       )}
       {chatBackground === 'dotGrid' && <div className="chat-dotgrid" aria-hidden="true" />}
+      {chatBackground === 'lightning' && (
+        <div className="chat-lightning" aria-hidden="true">
+          <span className="lightning-flash" />
+          <span className="lightning-bolt lightning-bolt--1" />
+          <span className="lightning-bolt lightning-bolt--2" />
+        </div>
+      )}
+      {chatBackground === 'waves' && (
+        <div className="chat-waves" aria-hidden="true">
+          <span className="wave-layer wave-layer--1" />
+          <span className="wave-layer wave-layer--2" />
+          <span className="wave-layer wave-layer--3" />
+        </div>
+      )}
+      {chatBackground === 'bokeh' && (
+        <div className="chat-bokeh" aria-hidden="true">
+          <span className="bokeh-layer bokeh-layer--1" />
+          <span className="bokeh-layer bokeh-layer--2" />
+        </div>
+      )}
+      {chatBackground === 'snowfall' && (
+        <div className="chat-snowfall" aria-hidden="true">
+          <span className="snow-layer snow-layer--1" />
+          <span className="snow-layer snow-layer--2" />
+          <span className="snow-layer snow-layer--3" />
+        </div>
+      )}
+      {chatBackground === 'gridLines' && <div className="chat-gridlines" aria-hidden="true" />}
+      {chatBackground === 'gradientWave' && <div className="chat-gradientwave" aria-hidden="true" />}
 
       <div className="chat-header">
         <div className="chat-header-title">

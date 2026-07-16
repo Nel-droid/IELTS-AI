@@ -187,7 +187,7 @@ function AppearanceSection() {
       <div className="settings-field">
         <label>{t('settings.chatBackground.label')}</label>
         <div className="settings-bg-picker">
-          {['starfield', 'aurora', 'dotGrid', 'off'].map(bg => (
+          {['starfield', 'aurora', 'dotGrid', 'lightning', 'waves', 'bokeh', 'snowfall', 'gridLines', 'gradientWave', 'off'].map(bg => (
             <button
               key={bg}
               className={`settings-bg-option${chatBackground === bg ? ' active' : ''}`}
